@@ -2,6 +2,10 @@ import pygame as pg
 import time
 import numpy as np
 
+s0 = 2
+s1 = 1
+s2 = 4
+
 
 class player:
     def __init__(self):
@@ -9,37 +13,10 @@ class player:
         # 输出4个数，最大的表示移动方向
         # 每次选取离目标最近的（距离最小的，Δx+Δy最小即可）
         # 输入p_x,p_y,t_x,t_y
-        self.weight1 = np.random.uniform(-5, 5, [2, 6])
-        self.weight2 = np.random.uniform(-5, 5, [6, 4])
-        self.bias1 = np.random.uniform(-5, 5, 6)
-        self.bias2 = np.random.uniform(-5, -5, 4)
-        self.wm1 = np.empty([10, 4, 6])
-        self.bm1 = np.empty([10, 6])
-        self.wm2 = np.empty([10, 6, 4])
-        self.bm2 = np.empty([10, 4])
-
-    def mutation(self):
-        # 产生十组网络参数变异
-        # 第一层
-        self.wm1 = np.random.uniform(-1, 1, [10, 2, 6]) + self.weight1
-        self.bm1 = np.random.uniform(-1, 1, [10, 6]) + self.bias1
-        # 第二层
-        self.wm2 = np.random.uniform(-1, 1, [10, 6, 4]) + self.weight2
-        self.bm2 = np.random.uniform(-1, 1, [10, 4]) + self.bias2
-
-    def evolve(self):
-        # 产生差异，优胜劣汰
-        a = np.empty(10)
-        t_x = np.random.randint(0, 15)
-        t_y = np.random.randint(0, 11)
-        for i in range(10):
-            # 在这里进行不同后代的选择
-            a[i] = gameplay(self.wm1[i], self.bm1[i], self.wm2[i], self.bm2[i], t_x, t_y)
-        x = a.tolist().index(a.min())
-        self.weight1 = self.wm1[x]
-        self.weight2 = self.wm2[x]
-        self.bias1 = self.bm1[x]
-        self.bias2 = self.bm2[x]
+        self.weight1 = np.random.uniform(-5, 5, [s0, s1])
+        self.weight2 = np.random.uniform(-5, 5, [s1, s2])
+        self.bias1 = np.random.uniform(-5, 5, s1)
+        self.bias2 = np.random.uniform(-5, -5, s2)
 
     def play(self):
         t_x = np.random.randint(0, 15)
@@ -82,7 +59,6 @@ def game(weight1, bias1, weight2, bias2, t_x, t_y):
     color = 255, 255, 0
     target_color = 255, 0, 0
     # 生成目标
-    score = 0
     step = 0
     while True:
         # 超过26步退出，两个方块接触退出
@@ -146,7 +122,7 @@ def gameplay(weight1, bias1, weight2, bias2, t_x, t_y):
     P.weight2 = weight2
     P.bias1 = bias1
     P.bias2 = bias2
-    rate = 0.01
+    rate = 0.05
     while True:
         # 超过26步退出，两个方块接触退出
 
@@ -163,10 +139,6 @@ def gameplay(weight1, bias1, weight2, bias2, t_x, t_y):
         #         pg.quit()
         #         return P
                 # exit()
-        # if step == 26:
-        #     pg.quit()
-        #     return 26*50
-        #     # exit()
         step += 1
         # 键盘操作
         # elif event.type == pg.KEYDOWN:
@@ -182,28 +154,28 @@ def gameplay(weight1, bias1, weight2, bias2, t_x, t_y):
         # 神经网络决策
         l = abs(p_x-t_x)+abs(p_y-t_y)
         havetry = True
-        wm1 = rate * np.random.uniform(-1, 1, [10, 2, 6]) + weight1
-        bm1 = rate * np.random.uniform(-1, 1, [10, 6]) + bias1
+        wm1 = rate * np.random.uniform(-1, 1, [10, s0, s1]) + weight1
+        bm1 = rate * np.random.uniform(-1, 1, [10, s1]) + bias1
         # 第二层
-        wm2 = rate * np.random.uniform(-1, 1, [10, 6, 4]) + weight2
-        bm2 = rate * np.random.uniform(-1, 1, [10, 4]) + bias2
+        wm2 = rate * np.random.uniform(-1, 1, [10, s1, s2]) + weight2
+        bm2 = rate * np.random.uniform(-1, 1, [10, s2]) + bias2
         wm1[0] = weight1
         bm1[0] = bias1
         wm2[0] = weight2
         bm2[0] = bias2
         ptx = 0
         pty = 0
-        r = 0.002
+        r = 0.02
         while havetry:
-            wm1 = r*np.random.uniform(-1, 1, [10, 2, 6]) + wm1
-            bm1 = r*np.random.uniform(-1, 1, [10, 6]) + bm1
+            wm1 = r*np.random.uniform(-1, 1, [10, s0, s1]) + wm1
+            bm1 = r*np.random.uniform(-1, 1, [10, s1]) + bm1
             # 第二层
-            wm2 = r*np.random.uniform(-1, 1, [10, 6, 4]) + wm2
-            bm2 = r*np.random.uniform(-1, 1, [10, 4]) + bm2
+            wm2 = r*np.random.uniform(-1, 1, [10, s1, s2]) + wm2
+            bm2 = r*np.random.uniform(-1, 1, [10, s2]) + bm2
             r += 0.005
             a = np.empty(10)
-            a1 = np.empty([10, 6])
-            a2 = np.empty([10, 4])
+            a1 = np.empty([10, s1])
+            a2 = np.empty([10, s2])
             op = np.empty(10)
             for i in range(10):
                 a1[i] = np.matmul([p_x-t_x, p_y-t_y], wm1[i]) + bm1[i]
@@ -271,13 +243,11 @@ def gameplay(weight1, bias1, weight2, bias2, t_x, t_y):
 
 def main():
     P1 = player()
-    P1.read()
+    # P1.read()
     str = ''
     while str != '0':
-        str = input("1.mutation\n2.evolve\n3.test\n4.save\n5.read\n0.exit")
+        str = input("1.evolve\n3.test\n4.save\n5.read\n6.show_net\n7.训练\n8.测试\n0.exit")
         if str == '1':
-            P1.mutation()
-        elif str == '2':
             P1.play()
         elif str == '3':
             P1.game()
@@ -291,6 +261,10 @@ def main():
             t = int(input("训练次数"))
             for i in range(t):
                 P1.play()
+        elif str == '8':
+            t = int(input("测试次数"))
+            for i in range(t):
+                P1.game()
 
 
 if __name__ == '__main__':
