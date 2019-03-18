@@ -3,8 +3,8 @@ import time
 import numpy as np
 
 s0 = 2
-s1 = 1
-s2 = 4
+s1 = 4
+# s2 = 4
 
 
 class player:
@@ -14,40 +14,43 @@ class player:
         # 每次选取离目标最近的（距离最小的，Δx+Δy最小即可）
         # 输入p_x,p_y,t_x,t_y
         self.weight1 = np.random.uniform(-5, 5, [s0, s1])
-        self.weight2 = np.random.uniform(-5, 5, [s1, s2])
+        # self.weight2 = np.random.uniform(-5, 5, [s1, s2])
         self.bias1 = np.random.uniform(-5, 5, s1)
-        self.bias2 = np.random.uniform(-5, -5, s2)
+        # self.bias2 = np.random.uniform(-5, -5, s2)
 
     def play(self):
         t_x = np.random.randint(0, 15)
         t_y = np.random.randint(0, 11)
         P = player()
-        P = gameplay(self.weight1, self.bias1, self.weight2, self.bias2, t_x, t_y)
+        # P = gameplay(self.weight1, self.bias1, self.weight2, self.bias2, t_x, t_y)
+        P = gameplay(self.weight1, self.bias1, t_x, t_y)
         self.weight1 = P.weight1
-        self.weight2 = P.weight2
+        # self.weight2 = P.weight2
         self.bias1 = P.bias1
-        self.bias2 = P.bias2
+        # self.bias2 = P.bias2
 
     def game(self):
         t_x = np.random.randint(0, 15)
         t_y = np.random.randint(0, 11)
-        game(self.weight1, self.bias1, self.weight2, self.bias2, t_x, t_y)
+        # game(self.weight1, self.bias1, self.weight2, self.bias2, t_x, t_y)
+        game(self.weight1, self.bias1, t_x, t_y)
 
     def save(self):
         np.save("weight1.npy", self.weight1)
-        np.save("weight2.npy", self.weight2)
+        # np.save("weight2.npy", self.weight2)
         np.save("bias1.npy", self.bias1)
-        np.save("bias2.npy", self.bias2)
+        # np.save("bias2.npy", self.bias2)
 
     def read(self):
         self.weight1 = np.load("weight1.npy")
-        self.weight2 = np.load("weight2.npy")
+        # self.weight2 = np.load("weight2.npy")
         self.bias1 = np.load("bias1.npy")
-        self.bias2 = np.load("bias2.npy")
+        # self.bias2 = np.load("bias2.npy")
 # 更新方案，更新一次产生十组差异，优胜劣汰
 
 
-def game(weight1, bias1, weight2, bias2, t_x, t_y):
+def game(weight1, bias1, t_x, t_y):
+# def game(weight1, bias1, weight2, bias2, t_x, t_y):
     pg.init()
     screen = pg.display.set_mode((800, 600))
     pg.display.set_caption("贪吃蛇")
@@ -75,8 +78,9 @@ def game(weight1, bias1, weight2, bias2, t_x, t_y):
         l = abs(p_x - t_x) + abs(p_y - t_y)
 
         a1 = np.matmul([p_x-t_x, p_y-t_y], weight1) + bias1
-        a2 = np.matmul(a1, weight2) + bias2
-        op = a2.tolist().index(a2.max())
+        # a2 = np.matmul(a1, weight2) + bias2
+        # op = a2.tolist().index(a2.max())
+        op = a1.tolist().index(a1.max())
         # 根据最大值决定移动方向
         if op == 0:
             velocity = [0, -1]
@@ -103,7 +107,9 @@ def game(weight1, bias1, weight2, bias2, t_x, t_y):
         print('t:', t_x, ',', t_y)
 
 
-def gameplay(weight1, bias1, weight2, bias2, t_x, t_y):
+def gameplay(weight1, bias1, t_x, t_y):
+# def gameplay(weight1, bias1, weight2, bias2, t_x, t_y):
+
     pg.init()
     screen = pg.display.set_mode((800, 600))
     pg.display.set_caption("贪吃蛇")
@@ -119,9 +125,9 @@ def gameplay(weight1, bias1, weight2, bias2, t_x, t_y):
     P = player()
 
     P.weight1 = weight1
-    P.weight2 = weight2
+    # P.weight2 = weight2
     P.bias1 = bias1
-    P.bias2 = bias2
+    # P.bias2 = bias2
     rate = 0.05
     while True:
         # 超过26步退出，两个方块接触退出
@@ -129,9 +135,9 @@ def gameplay(weight1, bias1, weight2, bias2, t_x, t_y):
         if p_x == t_x and p_y == t_y:
             pg.quit()
             P.weight1 = weight1
-            P.weight2 = weight2
+            # P.weight2 = weight2
             P.bias1 = bias1
-            P.bias2 = bias2
+            # P.bias2 = bias2
             pg.quit()
             return P
         # for event in pg.event.get():
@@ -157,12 +163,12 @@ def gameplay(weight1, bias1, weight2, bias2, t_x, t_y):
         wm1 = rate * np.random.uniform(-1, 1, [10, s0, s1]) + weight1
         bm1 = rate * np.random.uniform(-1, 1, [10, s1]) + bias1
         # 第二层
-        wm2 = rate * np.random.uniform(-1, 1, [10, s1, s2]) + weight2
-        bm2 = rate * np.random.uniform(-1, 1, [10, s2]) + bias2
+        # wm2 = rate * np.random.uniform(-1, 1, [10, s1, s2]) + weight2
+        # bm2 = rate * np.random.uniform(-1, 1, [10, s2]) + bias2
         wm1[0] = weight1
         bm1[0] = bias1
-        wm2[0] = weight2
-        bm2[0] = bias2
+        # wm2[0] = weight2
+        # bm2[0] = bias2
         ptx = 0
         pty = 0
         r = 0.02
@@ -170,17 +176,18 @@ def gameplay(weight1, bias1, weight2, bias2, t_x, t_y):
             wm1 = r*np.random.uniform(-1, 1, [10, s0, s1]) + wm1
             bm1 = r*np.random.uniform(-1, 1, [10, s1]) + bm1
             # 第二层
-            wm2 = r*np.random.uniform(-1, 1, [10, s1, s2]) + wm2
-            bm2 = r*np.random.uniform(-1, 1, [10, s2]) + bm2
+            # wm2 = r*np.random.uniform(-1, 1, [10, s1, s2]) + wm2
+            # bm2 = r*np.random.uniform(-1, 1, [10, s2]) + bm2
             r += 0.005
             a = np.empty(10)
             a1 = np.empty([10, s1])
-            a2 = np.empty([10, s2])
+            # a2 = np.empty([10, s2])
             op = np.empty(10)
             for i in range(10):
                 a1[i] = np.matmul([p_x-t_x, p_y-t_y], wm1[i]) + bm1[i]
-                a2[i] = np.matmul(a1[i], wm2[i]) + bm2[i]
-                op[i] = a2[i].tolist().index(a2[i].max())
+                # a2[i] = np.matmul(a1[i], wm2[i]) + bm2[i]
+                # op[i] = a2[i].tolist().index(a2[i].max())
+                op[i] = a1[i].tolist().index(a1[i].max())
             # a1 = np.matmul([p_x, p_y, t_x, t_y], weight1) + bias1
             # a2 = np.matmul(a1, weight2) + bias2
             # op = a2.tolist().index(a2.max())
@@ -203,9 +210,9 @@ def gameplay(weight1, bias1, weight2, bias2, t_x, t_y):
                 l2 = abs(ptx-t_x)+abs(pty-t_y)
                 if l2 < l:
                     weight1 = wm1[i]
-                    weight2 = wm2[i]
+                    # weight2 = wm2[i]
                     bias1 = bm1[i]
-                    bias2 = bm2[i]
+                    # bias2 = bm2[i]
                     havetry = False
                     break
         p_x = ptx
@@ -225,9 +232,9 @@ def gameplay(weight1, bias1, weight2, bias2, t_x, t_y):
         print('t:', t_x, ',', t_y)
         if step >= 100:
             P.weight1 = weight1
-            P.weight2 = weight2
+            # P.weight2 = weight2
             P.bias1 = bias1
-            P.bias2 = bias2
+            # P.bias2 = bias2
             print("本次变异没有产生有价值的后代")
             choice = input("是否进行更激进的变异？Y/N")
             if choice == 'Y' or choice == 'y':
